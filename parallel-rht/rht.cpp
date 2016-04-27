@@ -134,16 +134,16 @@ std::vector<Line> rht(int w, int h, std::vector<Point> const & points) {
                 #pragma omp critical
                 {
                     res.push_back(l);
-                    std::cout << res.size() << std::endl;
-                    if(res.size() >= 300) {
-                        //std::cout << l.angle << " " << l.offset << std::endl;
-                        int area = 10;
-                        for(int32_t a = std::max(offset_index, area) - area; a < std::min(offset_index, acc_offset_size - area) + area; a++) {
-                            for(int32_t b = std::max(theta_index, area) - area; b < std::min(theta_index, acc_theta_size - area) + area; b++) {
-                                acc(a, b) = 2*thres;
-                            }
-                        }
+                    //std::cout << res.size() << std::endl;
+                    if(res.size() >= 400) {
                         done = true;
+                    }
+                }
+                //std::cout << l.angle << " " << l.offset << std::endl;
+                int area = 10;
+                for(int32_t a = std::max(offset_index, area) - area; a < std::min(offset_index, acc_offset_size - area) + area; a++) {
+                    for(int32_t b = std::max(theta_index, area) - area; b < std::min(theta_index, acc_theta_size - area) + area; b++) {
+                        acc(a, b) = 2*thres;
                     }
                 }
                 if(done) break;
@@ -152,6 +152,11 @@ std::vector<Line> rht(int w, int h, std::vector<Point> const & points) {
     }
     
     return res;
+}
+
+inline double get_time() {
+    timespec x; assert(clock_gettime(CLOCK_MONOTONIC, &x) == 0);
+    return x.tv_sec * 1. + x.tv_nsec * 1e-9;
 }
 
 int main(int argc, char *argv[]) {
@@ -168,13 +173,23 @@ int main(int argc, char *argv[]) {
     }
     fclose(f);
     
+    double t1 = get_time();
+    
     // do filtering
     Array<uint8_t> result(w, h);
     sobel(img, result);
     
+    double t2 = get_time();
+    
     auto l = to_list(result);
     
+    double t3 = get_time();
+    
     std::vector<Line> res = rht(w, h, l);
+    
+    double t4 = get_time();
+    
+    std::cout << t2-t1 << " " << t3-t2 << " " << t4-t3 << std::endl;
     
     for(auto x : res) {
         x.draw(img);
