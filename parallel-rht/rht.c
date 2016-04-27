@@ -13,6 +13,33 @@ void sobel(int w, int h, unsigned char * img, unsigned char * result) {
     double Gx, Gy, G;
 #pragma omp parallel for default(shared) private(i, j, Gx, Gy, G)
     for(i = 1; i < h-1; i++) {
+        int k;
+        for(j = 1; j < w-1; j++) {
+            Gx = AC(img, i-1, j-1)*-1 + AC(img, i, j-1)*-2 + AC(img, i+1, j-1)*-1 +
+                        AC(img, i-1, j+1)*1 + AC(img, i, j+1)*2 + AC(img, i+1, j+1)*1;
+            Gy = AC(img, i-1, j-1)*-1 + AC(img, i-1, j)*-2 + AC(img, i-1, j+1)*-1 +
+                        AC(img, i+1, j-1)*1 + AC(img, i+1, j)*2 + AC(img, i+1, j+1)*1;
+            G = sqrt(Gx*Gx + Gy*Gy) * .2;
+            AC(result, i, j) = G;
+        }
+    }
+}
+
+void edge_to_list(int w, int h, unsigned char * edge, 
+
+struct Line {
+    double angle;
+    double offset;
+};
+
+void sobel2(int w, int h, unsigned char * img, unsigned char * result) {
+    int acc_offset_size = sqrt(w*w+h*h)/3;
+    int acc_theta_size = acc_offset_size;
+    
+    int i, j;
+    double Gx, Gy, G;
+#pragma omp parallel for default(shared) private(i, j, Gx, Gy, G)
+    for(i = 1; i < h-1; i++) {
         for(j = 1; j < w-1; j++) {
             Gx = AC(img, i-1, j-1)*-1 + AC(img, i, j-1)*-2 + AC(img, i+1, j-1)*-1 +
                         AC(img, i-1, j+1)*1 + AC(img, i, j+1)*2 + AC(img, i+1, j+1)*1;
